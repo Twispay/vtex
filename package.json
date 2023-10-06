@@ -1,0 +1,16 @@
+{
+    "name": "payment-plugin",
+    "version": "1.0.0",
+    "description": "A payment processing plugin with subscription support.",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js"
+    },
+    "keywords": ["payment", "plugin", "subscription"],
+    "author": "Twispay",
+    "license": "ISC",
+    "dependencies": {
+      "axios": "^0.26.0",
+      "@sendgrid/mail": "^7.4.0"
+    }
+  }
