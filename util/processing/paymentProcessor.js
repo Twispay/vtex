@@ -7,9 +7,12 @@ class PaymentProcessor {
      * @param {string} apiKey - API key for authentication.
      * @param {string} apiEndpoint - Endpoint for API requests.
      */
-    constructor(apiKey, apiEndpoint) {
+    constructor(apiKey, apiEndpoint, siteId, customerId, log) {
         this.apiKey = apiKey;
         this.apiEndpoint = apiEndpoint;
+        this.siteId = siteId;
+        this.customerId = customerId;
+        this.log = log;
     }
 
     /**
@@ -24,69 +27,58 @@ class PaymentProcessor {
      * @param {string} description - A description of the payment.
      * @return {Promise} - The promise of the API request.
      */
-    async makePayment(amount, currency, orderId, customerId, paymentMethod, callbackUrl, description) {
-        const paymentData = {
-            amount,
-            currency,
-            orderId,
-            customerId,
-            paymentMethod,
-            callbackUrl,
-            description,
-        };
-
+    async createPayment(paymentData) {
+        const postData = {
+            siteId: this.siteId, // Your Twispay site ID
+            customerId: this.customerId, // Customer ID, manage as per your use case
+            amount: paymentData.amount,
+            currency: paymentData.currency, // Ensure to use the correct currency code
+            description: paymentData.description,
+            invoiceEmail: paymentData.invoiceEmail,
+            createdAt: (new Date()).toISOString(), // Created At
+            tags: {module: {vtex: "vtex"}}
+        }
+    
         const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`
+            'Authorization': `Bearer ${this.apiKey}` // Use 'Bearer' or other type of authentication as per API documentation
         };
 
         try {
-            const response = await axios.post(this.apiEndpoint, paymentData, { headers });
+            const response = await axios.post(`${this.apiEndpoint}/order/`, postData, { headers });
+            this.log.info(`${(new Date()).toISOString()}: Order successfully created with ${postData}`)
             return response.data;
         } catch (error) {
-            console.error('Error processing payment:', error);
+            this.log.error('Error processing payment:', error);
             throw error;
         }
     }
 
     /**
-     * Create a subscription via API.
+     * Refund a payment via Twispay API.
      * 
-     * @param {object} subscriptionData - Data needed to create a subscription.
+     * @param {string} paymentId - The ID of the payment to refund.
+     * @param {number} [amount] - The amount to be refunded. If not specified, full amount will be refunded.
      * @return {Promise} - The promise of the API request.
      */
-    async createSubscription(subscriptionData) {
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`
-        };
-
-        try {
-            const response = await axios.post(`${this.apiEndpoint}/subscriptions`, subscriptionData, { headers });
-            return response.data;
-        } catch (error) {
-            console.error('Error creating subscription:', error);
-            throw error;
+    async refundPayment(refundData) {
+        const deleteData = {
+            orderId: refundData.orderId,
+            amount: refundData.amount,
+            TWISPAY_CUSTOMER_ID,
         }
-    }
-
-    /**
-     * Cancel a subscription via API.
-     * 
-     * @param {string} subscriptionId - The ID of the subscription to cancel.
-     * @return {Promise} - The promise of the API request.
-     */
-    async cancelSubscription(subscriptionId) {
+    
         const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`
+            'Authorization': `Bearer ${this.apiKey}` // Use 'Bearer' or other type of authentication as per API documentation
         };
-
+    
         try {
-            const response = await axios.delete(`${this.apiEndpoint}/subscriptions/${subscriptionId}`, { headers });
+            const response = await axios.delete(`${this.apiEndpoint}/transaction/${refundData.orderId}/`, deleteData, { headers });
+            this.log.info(`${(new Date()).toISOString()}: Refund succeeded on order ${orderId} with ${amount}`)
             return response.data;
         } catch (error) {
-            console.error('Error canceling subscription:', error);
+            this.log.error('Error processing refund:', error);
             throw error;
         }
     }

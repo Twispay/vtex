@@ -1,9 +1,3 @@
----
-noteId: "0bc31b80641911eeaaab85c4f2b41c2e"
-tags: []
-
----
-
 ```markdown
 # Twispay Payment Plugin for Your Platform
 

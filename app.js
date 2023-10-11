@@ -1,28 +1,40 @@
-const PaymentProcessor = require('./paymentProcessor');
+const PaymentProcessor = require('./util/processing/paymentProcessor');
+const SubscriptionProcessor = require('./util/processing/subscriptionProcessor');
 const config = require('./config');
+const Log = require('./util/logger/Log'); // Adjust the path according to your project structure
+const log = new Log(path.join(config.LOG_FILE_PATH, 'app.log'));
 
-const paymentProcessor = new PaymentProcessor(config.TWISPAY_API_KEY, config.TWISPAY_API_ENDPOINT);
+const paymentProcessor = new PaymentProcessor(config.TWISPAY_API_KEY, config.TWISPAY_API_ENDPOINT, config.TWISPAY_SITE_ID, config.TWISPAY_CUSTOMER_ID, log);
+const subscriptionProcessor = new PaymentProcessor(config.TWISPAY_API_KEY, config.TWISPAY_API_ENDPOINT, config.TWISPAY_SITE_ID, config.TWISPAY_CUSTOMER_ID, log);
 
-// ...previous processPayment function...
+async function createPayment(paymentData) {
+    try {
+        const paymentResult = await paymentProcessor.createPayment(paymentData);
+    } catch (error) {
+        log.error('Subscription creation failed:', error);
+    }
+}
+
+async function refundPayment(refundData) {
+    try {
+        const refundResult = await paymentProcessor.refundPayment(refundData);
+    } catch (error) {
+        log.error('Refund failed:', error);
+    }
+}
 
 async function createSubscription(subscriptionData) {
     try {
-        const subscriptionResult = await paymentProcessor.createSubscription(subscriptionData);
-        console.log('Subscription Result:', subscriptionResult);
-        // Handle subscription result as needed
+        const subscriptionResult = await subscriptionProcessor.createSubscription(subscriptionData);
     } catch (error) {
-        console.error('Subscription creation failed:', error);
-        // Handle failure as needed
+        log.error('Subscription creation failed:', error);
     }
 }
 
 async function cancelSubscription(subscriptionId) {
     try {
-        const cancellationResult = await paymentProcessor.cancelSubscription(subscriptionId);
-        console.log('Cancellation Result:', cancellationResult);
-        // Handle cancellation result as needed
+        const cancellationResult = await subscriptionProcessor.cancelSubscription(subscriptionId);
     } catch (error) {
-        console.error('Subscription cancellation failed:', error);
-        // Handle failure as needed
+        log.error('Subscription cancellation failed:', error);
     }
 }
