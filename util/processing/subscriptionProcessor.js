@@ -42,19 +42,8 @@ class PaymentProcessor {
                 }
             ]
         };
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`
-        };
-
-        try {
-            const response = await axios.post(`${this.apiEndpoint}/order/`, subscriptionData, { headers });
-            this.log.info(`${(new Date()).toISOString()}: Subscription successfully created with ${postData}`)
-            return response.data;
-        } catch (error) {
-            this.log.error('Error creating subscription:', error);
-            throw error;
-        }
+        
+        return postData;
     }
 
     /**

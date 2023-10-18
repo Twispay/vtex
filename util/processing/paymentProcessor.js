@@ -38,20 +38,8 @@ class PaymentProcessor {
             createdAt: (new Date()).toISOString(), // Created At
             tags: {module: {vtex: "vtex"}}
         }
-    
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}` // Use 'Bearer' or other type of authentication as per API documentation
-        };
 
-        try {
-            const response = await axios.post(`${this.apiEndpoint}/order/`, postData, { headers });
-            this.log.info(`${(new Date()).toISOString()}: Order successfully created with ${postData}`)
-            return response.data;
-        } catch (error) {
-            this.log.error('Error processing payment:', error);
-            throw error;
-        }
+        return postData;
     }
 
     /**
@@ -68,19 +56,7 @@ class PaymentProcessor {
             TWISPAY_CUSTOMER_ID,
         }
     
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}` // Use 'Bearer' or other type of authentication as per API documentation
-        };
-    
-        try {
-            const response = await axios.delete(`${this.apiEndpoint}/transaction/${refundData.orderId}/`, deleteData, { headers });
-            this.log.info(`${(new Date()).toISOString()}: Refund succeeded on order ${orderId} with ${amount}`)
-            return response.data;
-        } catch (error) {
-            this.log.error('Error processing refund:', error);
-            throw error;
-        }
+        return deleteData;
     }
 }
 

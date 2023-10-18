@@ -1,0 +1,33 @@
+<!-- config_form.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Configuration</title>
+</head>
+<body>
+    <h1>Update Configuration</h1>
+    <form action="/update-config" method="post">
+        <div>
+            <label for="api_key">API Key:</label>
+            <input type="text" id="api_key" name="api_key" required>
+        </div>
+        <div>
+            <label for="api_endpoint">API Endpoint:</label>
+            <input type="text" id="api_endpoint" name="api_endpoint" required>
+        </div>
+        <div>
+            <label for="site_id">Site ID:</label>
+            <input type="text" id="site_id" name="site_id" required>
+        </div>
+        <div>
+            <label for="customer_id">Customer ID:</label>
+            <input type="text" id="customer_id" name="customer_id" required>
+        </div>
+        <!-- Include other fields as necessary -->
+        <div>
+            <button type="submit">Update Configuration</button>
+        </div>
+    </form>
+</body>
+</html>
