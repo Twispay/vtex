@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting for Payment</title>
+    <script type="text/javascript">
+        window.onload = function(){
+            document.forms['paymentForm'].submit();
+        }
+    </script>
+</head>
+<body>
+    <form id="paymentForm" action="<%= formData.actionUrl %>" method="post">
+        <% for (let key in formData) { %>
+            <% if (key !== 'actionUrl') { %>
+                <input type="hidden" name="<%= key %>" value="<%= formData[key] %>" />
+            <% } %>
+        <% } %>
+        <noscript>
+            <input type="submit" value="Click here if you are not redirected automatically" />
+        </noscript>
+    </form>
+</body>
+</html>

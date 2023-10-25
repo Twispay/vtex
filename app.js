@@ -112,6 +112,26 @@ router.post('/cancel-subscription', async (req, res) => {
     }
 });
 
+// IPN Listener Route
+router.post('/ipn-listener', async (req, res) => {
+    try {
+        const ipnMessage = req.body;
+
+        res.status(200).send('OK');
+
+        const isValid = await paymentProcessor.verifyIPN(ipnMessage);
+
+        if (isValid) {
+            Logger.info('Received VALID IPN message - processing');
+            await paymentProcessor.handleIPNMessage(ipnMessage);
+        } else {
+            Logger.warn('Received INVALID IPN message - ignoring');
+        }
+    } catch (error) {
+        Logger.error('Error receiving IPN message', error);
+    }
+});
+
 // Route for handling the payment completion callback
 router.get('/complete-payment', (req, res) => {
     res.send('Payment completed');

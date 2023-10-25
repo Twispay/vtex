@@ -58,6 +58,68 @@ class PaymentProcessor {
     
         return deleteData;
     }
+
+    async verifyIPN(ipnMessage) {
+        try {
+            const verificationData = {
+                ...ipnMessage,  // replicate the received message
+            };
+
+            // Send the verification request to the payment gateway's IPN verification endpoint
+            const response = await axios.post(`env.IPN_ENDPOINT`, verificationData);
+
+            // Analyze the verification response
+            // The expected content of the response will depend on your payment gateway's specifications.
+            const isVerified = response.data === 'VERIFIED'; // This condition is an example.
+
+            if (!isVerified) {
+                this.log.warn('Received an INVALID IPN message', { ipnMessage });
+            }
+
+            return isVerified;
+        } catch (error) {
+            this.log.error('Error verifying IPN message', error);
+            return false; // Verification failed due to an error
+        }
+    }
+
+       /**
+     * Handle the verified IPN message.
+     * Implement the business logic that should be triggered by a verified IPN, such as updating order status, etc.
+     *
+     * @param {Object} ipnMessage - The verified IPN message received from the payment gateway.
+     */
+        async handleIPNMessage(ipnMessage) {
+            try {
+                // Extract relevant information from the IPN message
+                // The structure of ipnMessage and the names of its properties depend on your payment gateway's IPN format.
+                const {
+                    transactionId, 
+                    paymentStatus,
+                } = ipnMessage;
+    
+                if (paymentStatus === 'Completed') {
+                    // Apply business logic for a successful payment
+                    // For instance, update the related order record in your database, trigger further workflows, etc.
+    
+                    await database.updateOrderStatus(transactionId, 'Paid');
+                    await vtex.triggerPostPaymentWorkflow(transactionId);
+    
+                    this.log.info(`Payment completed successfully for transaction ${transactionId}`);
+                } else if (paymentStatus === 'Failed') {
+                    // Handle failed payments
+                    // Log for review, send alerts, trigger any relevant workflows, etc.
+    
+                    this.log.warn(`Payment failed for transaction ${transactionId}`);
+                }
+    
+                // Always record the IPN outcome for auditing purposes.
+                this.log.info('Processed IPN message', { ipnMessage });
+            } catch (error) {
+                this.log.error('Error handling IPN message', error);
+            }
+        }
+    
 }
 
 module.exports = PaymentProcessor;
